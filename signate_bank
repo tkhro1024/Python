@@ -1,0 +1,8 @@
+# pandasのインポート
+import pandas as pd
+
+# データの読み込み
+df = pd.read_csv('data.csv', index_col='id')
+
+# データの先頭10行の表示
+print( df.head(10) )

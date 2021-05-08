@@ -1,8 +1,64 @@
-# pandasのインポート
-import pandas as pd
+###1_read.data
+import pandas as pd # pandasのインポート
+import matplotlib.pyplot as plt # matplotlib.pyplotのインポート
+import seaborn as sns # seabornのインポート
+df = pd.read_csv('data.csv', index_col='id') # df格納_ indexとするcolumn名
 
-# データの読み込み
-df = pd.read_csv('data.csv', index_col='id')
+###2_overlook.data
+print(df.head(10)) # 先頭10行
+print(df.shape) # 行数・列数
+print(df.info()) # カラム情報
+print(df.describe()) # 数値（int.float）型データの基本統計量
+print(df.describe(include=['O'])) #object型データの基本統計量
+print(df['y']) #特定のカラム（列）の抽出
+print( df.loc[[2, 3], ['age', 'job', 'y']] ) # インデックス2,3 カラムage, job, yをこの順に取り出した(行列の取り出し)
+print( df.drop('y', axis=1)　# カラムyを取り除いた
+print( df['y'].value_counts() ) # カラムyの要素の種類とその要素の出現数
 
-# データの先頭10行の表示
-print( df.head(10) )
+###3_edit.crosstab
+cross = pd.crosstab(df['poutcome'], df['y'], margins=True) #クロス集計表（縦軸, 横軸, margin=Trueで合計表示)
+rate = cross[1] / cross["All"] #申込率の計算
+cross["cvr"] = rate #クロス集計結果に申込率cvrを追加
+print(cross) #申込率を追加したクロス集計表の表示
+print(cross.loc[["success", "failure"], "cvr"]) #クロス集計表からインデックス'success', 'failure'、カラム'cvr'のみを取り出して表示
+corr_matrix = df.corr()# 量的データの相関係数の計算
+print( corr_matrix )# 量的データの相関係数の表示
+
+###4_show.heatmap
+corr_matrix = df.corr() # 量的データの相関係数の計算
+sns.heatmap(corr_matrix, cmap="Reds") # heatmapを作成
+plt.title('Correlation') # グラフにタイトルを追加
+plt.show() # グラフを表示
+
+###5_filter.data & distplot(hist)
+print( df[df['y']==1] ) # yの値が1のデータを表示
+print( df[df['y']==1]['duration'] )# yの値が1のデータのdurationを表示
+duration_0 = df[df['y']==0]['duration']# durationの抜き出し
+duration_1 = df[df['y']==1]['duration']# durationの抜き出し
+
+sns.distplot(duration_0, label='y=0')# ヒストグラムの作成
+sns.distplot(duration_1, label='y=1')# ヒストグラムの作成
+
+plt.title('duration histgram')# グラフにタイトルを追加
+plt.xlabel('duration')# グラフのx軸に名前を追加
+plt.ylabel('frequency')# グラフのy軸に名前を追加
+plt.xlim(0, 2000)# x軸の表示範囲の指定
+plt.legend()# グラフに凡例を追加
+plt.show()# グラフを表示
+
+###6_fit&predict.data
+df = pd.get_dummies(df)# データのダミー変数化
+data_X = df.drop('y', axis=1) # 説明変数をdata_X/yだけ取り除いている
+data_y = df['y'] # 目的変数をdata_yに代入
+
+from sklearn.model_selection import train_test_split # train_test_splitのインポート
+train_X, test_X, train_y, test_y = train_test_split(data_X, data_y, test_size=0.25, random_state=0) # 学習データと評価データにデータを分割
+print( train_y.shape[0]) # 学習用データの説明変数の行数の表示
+print( test_y.shape[0]) # 評価用データの説明変数の行数の表示
+
+
+from sklearn.tree import DecisionTreeClassifier as DT # 決定木モデルのインポート
+tree = DT(max_depth = 2, random_state = 0 ) # 決定木モデルの準備
+
+
+
